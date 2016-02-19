@@ -1,8 +1,8 @@
 <?php
 
-namespace Fuzz\AuthPassword;
+namespace Fuzz\Auth\OAuth\Grants;
 
-use League\OAuth2\Server\Entity\AccessTokenEntity;
+use Fuzz\Auth\Models\OauthTokenEntity;
 use League\OAuth2\Server\Entity\ClientEntity;
 use League\OAuth2\Server\Entity\RefreshTokenEntity;
 use League\OAuth2\Server\Event;
@@ -84,7 +84,7 @@ class RefreshTokenGrant extends OauthRefreshTokenGrant
 		}
 
 		// Generate a new access token and assign it the correct sessions
-		$newAccessToken = new AccessTokenEntity($this->server);
+		$newAccessToken = new OauthTokenEntity($this->server);
 		$newAccessToken->setId(SecureKey::generate());
 		$newAccessToken->setExpireTime($this->getAccessTokenTTL() + time());
 		$newAccessToken->setSession($session);

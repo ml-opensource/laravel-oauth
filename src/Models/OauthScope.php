@@ -2,41 +2,45 @@
 
 namespace Fuzz\Auth\Models;
 
-use League\OAuth2\Server\AbstractServer;
-use League\OAuth2\Server\Entity\ScopeEntity;
-use League\OAuth2\Server\Storage\ScopeInterface;
-use Symfony\Component\Security\Core\Role\RoleInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
-class OauthScope extends ScopeEntity implements RoleInterface
+class OauthScope extends Model
 {
 	public $incrementing = false;
 
-	public $id;
-	public $description;
-
-	private $scope_entity;
-
-	public function __construct(AbstractServer $server, ScopeInterface $scope_entity)
+	/**
+	 * User relationship
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+	 */
+	public function users()
 	{
-		parent::__construct($server);
-
-		$this->scope_entity = $scope_entity;
-		$this->id = $scope_entity->id;
-		$this->description = $scope_entity->description;
+		return $this->belongsToMany(User::class);
 	}
 
 	/**
-	 * Returns the role.
+	 * Clients relationship
 	 *
-	 * This method returns a string representation whenever possible.
-	 *
-	 * When the role cannot be represented with sufficient precision by a
-	 * string, it should return null.
-	 *
-	 * @return string|null A string representation of the role, or null
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
-	public function getRole()
+	public function clients()
 	{
-		return $this->id;
+		return $this->belongsToMany(OauthClient::class, 'oauth_client_scopes', 'scope_id', 'client_id');
+	}
+
+	// @todo does this belong here?
+	public static function attachToUser(Model $user, array $scopes)
+	{
+		$attach_scopes = [];
+
+		foreach ($scopes as $scope) {
+			$attach_scopes[] = [
+				'user_id' => $user->id,
+				'oauth_scope_id' => $scope,
+			];
+		}
+
+		DB::table('oauth_scope_user')->insert($attach_scopes);
 	}
 }

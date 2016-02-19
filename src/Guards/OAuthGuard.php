@@ -2,10 +2,10 @@
 
 namespace Fuzz\Auth\Guards;
 
+use Fuzz\Auth\Models\AgentResolverInterface;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
-use LucaDegasperi\OAuth2Server\Facades\Authorizer;
 
 class OAuthGuard implements Guard
 {
@@ -39,6 +39,9 @@ class OAuthGuard implements Guard
 	 */
 	public function __construct(UserProvider $provider)
 	{
+		if (! $provider instanceof AgentResolverInterface) {
+			throw new \LogicException(get_class($provider) . ' does not implement ' . AgentResolverInterface::class);
+		}
 		$this->provider = $provider;
 		$this->inputKey = 'access_token';
 	}
@@ -59,13 +62,7 @@ class OAuthGuard implements Guard
 			return $this->user;
 		}
 
-		$user = null;
-
-		if (Authorizer::validateAccessToken()) {
-			$user = $this->provider->retrieveById(Authorizer::getResourceOwnerId());
-		}
-
-		return $this->user = $user;
+		return $this->user = $this->provider->resolveAppAgent();
 	}
 
 	/**
@@ -77,14 +74,6 @@ class OAuthGuard implements Guard
 	 */
 	public function validate(array $credentials = [])
 	{
-		if (Authorizer::validateAccessToken(false, $credentials[$this->inputKey])) {
-			$userId = Authorizer::getResourceOwnerId();
-
-			if ($this->provider->retrieveById($userId)) {
-				return true;
-			}
-		}
-
-		return false;
+		return ! is_null($this->provider->retrieveByCredentials($credentials));
 	}
 }

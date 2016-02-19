@@ -2,11 +2,10 @@
 
 namespace Fuzz\Auth\OAuth\Grants;
 
-use Fuzz\Auth\Models\OauthScope;
-use Fuzz\Auth\Models\OauthToken;
+use Fuzz\Auth\Models\OauthScopeEntity;
+use Fuzz\Auth\Models\OauthTokenEntity;
 use League\OAuth2\Server\Entity\ScopeEntity;
 use League\OAuth2\Server\Grant\PasswordGrant as OauthPasswordGrant;
-use League\OAuth2\Server\Entity\AccessTokenEntity;
 use League\OAuth2\Server\Entity\ClientEntity;
 use League\OAuth2\Server\Entity\RefreshTokenEntity;
 use League\OAuth2\Server\Entity\SessionEntity;
@@ -81,7 +80,7 @@ class PasswordGrant extends OauthPasswordGrant
 		$session->associateClient($client);
 
 		// Generate an access token
-		$accessToken = new OauthToken($this->server);
+		$accessToken = new OauthTokenEntity($this->server);
 		$accessToken->setId(SecureKey::generate());
 		$accessToken->setExpireTime($this->getAccessTokenTTL() + time());
 
@@ -173,7 +172,7 @@ class PasswordGrant extends OauthPasswordGrant
 				throw new Exception\InvalidScopeException($scopeItem, $redirectUri);
 			}
 
-			$scopes[$scope->getId()] = new OauthScope($this->server, $scope);
+			$scopes[$scope->getId()] = new OauthScopeEntity($this->server, $scope);
 		}
 
 		return $scopes;

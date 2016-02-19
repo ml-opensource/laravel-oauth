@@ -9,28 +9,25 @@ use Fuzz\Auth\Guards\OAuthGuard;
 
 class AuthServiceProvider extends ServiceProvider
 {
-    ///**
-    // * The policy mappings for the application.
-    // *
-    // * @var array
-    // */
-    //protected $policies = [
-    //    'Tapwiser\Model' => 'Tapwiser\Policies\ModelPolicy',
-    //];
+	/**
+	 * Register any application authentication / authorization services.
+	 *
+	 * @param  \Illuminate\Contracts\Auth\Access\Gate $gate
+	 * @return void
+	 */
+	public function boot(GateContract $gate)
+	{
+		$this->registerPolicies($gate); // @todo not needed?
 
-    /**
-     * Register any application authentication / authorization services.
-     *
-     * @param  \Illuminate\Contracts\Auth\Access\Gate  $gate
-     * @return void
-     */
-    public function boot(GateContract $gate)
-    {
-        $this->registerPolicies($gate);
+		Auth::provider(
+			'oauth', function ($app, array $config) {
+				return new FuzzAuthUserProvider($config);
+		});
 
-	    // Register an OAuthGuard to be used for our
-        Auth::extend(OAuthGuard::class, function($app, $name, array $config) {
-	        return new OAuthGuard(Auth::createUserProvider($config['provider']));
-        });
-    }
+		// Register an OAuthGuard to be used for our
+		Auth::extend(
+			OAuthGuard::class, function ($app, $name, array $config) {
+				return new OAuthGuard(Auth::createUserProvider($config['provider']));
+		});
+	}
 }

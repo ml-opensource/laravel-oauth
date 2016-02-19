@@ -2,6 +2,7 @@
 
 namespace Fuzz\Auth\OAuth\Grants;
 
+use Fuzz\Auth\Models\AgentInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -47,19 +48,20 @@ class PasswordGrantVerifier
 		$this->request    = $request;
 		$this->config     = $config;
 		$this->auth       = $auth;
-		$this->user_model = config('auth.model');
+		$this->user_model = config('auth.providers.users.model');
 	}
 
 	/**
 	 * @param $username
+	 * @param $email
 	 * @param $password
 	 * @return bool
 	 */
 	private function validateCredentials($username, $email, $password)
 	{
 		$user_model = $this->user_model;
-		if (! in_array('Fuzz\AuthPassword\Models\PasswordableTrait', class_uses($user_model))) {
-			throw new \LogicException('User model does not use PasswordableTrait');
+		if (! ((new $user_model) instanceof AgentInterface)) {
+			throw new \LogicException('User model does not implement ' . AgentInterface::class . '.');
 		}
 
 		$query = $user_model::query();

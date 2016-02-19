@@ -9,7 +9,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Role\RoleInterface;
 
 // @todo grant should set this class as token
-class OauthToken extends AccessTokenEntity implements TokenInterface
+class OauthTokenEntity extends AccessTokenEntity implements TokenInterface
 {
 	// @todo define interface
 	private $user;
