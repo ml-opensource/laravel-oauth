@@ -30,27 +30,26 @@ class PasswordGrant extends OauthPasswordGrant
 			throw new Exception\InvalidRequestException('client_id');
 		}
 
-		$clientSecret = $this->server->getRequest()->request->get('client_secret',
-			$this->server->getRequest()->getPassword());
+		$clientSecret = $this->server->getRequest()->request->get(
+			'client_secret', $this->server->getRequest()->getPassword()
+		);
 		if (is_null($clientSecret)) {
 			throw new Exception\InvalidRequestException('client_secret');
 		}
 
 		// Validate client ID and client secret
 		$client = $this->server->getClientStorage()->get(
-			$clientId,
-			$clientSecret,
-			null,
-			$this->getIdentifier()
+			$clientId, $clientSecret, null, $this->getIdentifier()
 		);
 
 		if (($client instanceof ClientEntity) === false) {
-			$this->server->getEventEmitter()->emit(new Event\ClientAuthenticationFailedEvent($this->server->getRequest()));
+			$this->server->getEventEmitter()
+				->emit(new Event\ClientAuthenticationFailedEvent($this->server->getRequest()));
 			throw new Exception\InvalidClientException();
 		}
 
 		$username = $this->server->getRequest()->request->get('username', null);
-		$email = $this->server->getRequest()->request->get('email', null);
+		$email    = $this->server->getRequest()->request->get('email', null);
 
 		// Require at least one
 		if (is_null($username) && is_null($email)) {
@@ -64,10 +63,11 @@ class PasswordGrant extends OauthPasswordGrant
 
 		// Check if user's username and password are correct and custom validate scopes
 		$validatedDetails = call_user_func($this->getVerifyCredentialsCallback(), $username, $email, $password);
-		$userId = $validatedDetails['user_id'];
+		$userId           = $validatedDetails['user_id'];
 
 		if ($userId === false) {
-			$this->server->getEventEmitter()->emit(new Event\UserAuthenticationFailedEvent($this->server->getRequest()));
+			$this->server->getEventEmitter()
+				->emit(new Event\UserAuthenticationFailedEvent($this->server->getRequest()));
 			throw new Exception\InvalidCredentialsException();
 		}
 
@@ -119,6 +119,7 @@ class PasswordGrant extends OauthPasswordGrant
 
 		// Return scopes with the response
 		$response['scopes'] = array_keys($scopes);
+
 		return $response;
 	}
 
@@ -131,7 +132,8 @@ class PasswordGrant extends OauthPasswordGrant
 	 *
 	 * @return \League\OAuth2\Server\Entity\ScopeEntity[]
 	 *
-	 * @throws \League\OAuth2\Server\Exception\InvalidScopeException If scope is invalid, or no scopes passed when required
+	 * @throws \League\OAuth2\Server\Exception\InvalidScopeException If scope is invalid, or no scopes passed when
+	 *                                                               required
 	 * @throws
 	 */
 	public function validateScopes($scopeParam = '', ClientEntity $client, $redirectUri = null)
@@ -145,8 +147,7 @@ class PasswordGrant extends OauthPasswordGrant
 			}
 		}
 
-		if (
-			$this->server->scopeParamRequired() === true
+		if ($this->server->scopeParamRequired() === true
 			&& $this->server->getDefaultScope() === null
 			&& count($scopesList) === 0
 		) {
@@ -163,9 +164,7 @@ class PasswordGrant extends OauthPasswordGrant
 
 		foreach ($scopesList as $scopeItem) {
 			$scope = $this->server->getScopeStorage()->get(
-				$scopeItem,
-				$this->getIdentifier(),
-				$client->getId()
+				$scopeItem, $this->getIdentifier(), $client->getId()
 			);
 
 			if (($scope instanceof ScopeEntity) === false) {

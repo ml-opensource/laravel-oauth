@@ -22,22 +22,21 @@ class RefreshTokenGrant extends OauthRefreshTokenGrant
 			throw new Exception\InvalidRequestException('client_id');
 		}
 
-		$clientSecret = $this->server->getRequest()->request->get('client_secret',
-			$this->server->getRequest()->getPassword());
+		$clientSecret = $this->server->getRequest()->request->get(
+			'client_secret', $this->server->getRequest()->getPassword()
+		);
 		if (is_null($clientSecret)) {
 			throw new Exception\InvalidRequestException('client_secret');
 		}
 
 		// Validate client ID and client secret
 		$client = $this->server->getClientStorage()->get(
-			$clientId,
-			$clientSecret,
-			null,
-			$this->getIdentifier()
+			$clientId, $clientSecret, null, $this->getIdentifier()
 		);
 
 		if (($client instanceof ClientEntity) === false) {
-			$this->server->getEventEmitter()->emit(new Event\ClientAuthenticationFailedEvent($this->server->getRequest()));
+			$this->server->getEventEmitter()
+				->emit(new Event\ClientAuthenticationFailedEvent($this->server->getRequest()));
 			throw new Exception\InvalidClientException();
 		}
 
@@ -62,11 +61,11 @@ class RefreshTokenGrant extends OauthRefreshTokenGrant
 
 		// Get the scopes for the original session
 		$session = $oldAccessToken->getSession();
-		$scopes = $this->formatScopes($session->getScopes());
+		$scopes  = $this->formatScopes($session->getScopes());
 
 		// Get and validate any requested scopes
 		$requestedScopesString = $this->server->getRequest()->request->get('scope', '');
-		$requestedScopes = $this->validateScopes($requestedScopesString, $client);
+		$requestedScopes       = $this->validateScopes($requestedScopesString, $client);
 
 		// If no new scopes are requested then give the access token the original session scopes
 		if (count($requestedScopes) === 0) {
@@ -75,7 +74,7 @@ class RefreshTokenGrant extends OauthRefreshTokenGrant
 			// The OAuth spec says that a refreshed access token can have the original scopes or fewer so ensure
 			//  the request doesn't include any new scopes
 			foreach ($requestedScopes as $requestedScope) {
-				if (!isset($scopes[$requestedScope->getId()])) {
+				if (! isset($scopes[$requestedScope->getId()])) {
 					throw new Exception\InvalidScopeException($requestedScope->getId());
 				}
 			}
@@ -120,9 +119,13 @@ class RefreshTokenGrant extends OauthRefreshTokenGrant
 		$response = $this->server->getTokenType()->generateResponse();
 
 		// Return scopes with the response
-		$response['scopes'] = array_keys(array_map(function ($scope) {
-			return $scope->getId();
-		} ,$newScopes));
+		$response['scopes'] = array_keys(
+			array_map(
+				function ($scope) {
+					return $scope->getId();
+				}, $newScopes
+			)
+		);
 
 		return $response;
 	}

@@ -35,7 +35,7 @@ class FuzzAuthUserProvider implements UserProvider, AgentResolverInterface
 		$this->validateConfig($config);
 
 		$this->user_model = $config['model'];
-		$this->token_key = $config['token_key'];
+		$this->token_key  = $config['token_key'];
 	}
 
 	/**
@@ -45,7 +45,10 @@ class FuzzAuthUserProvider implements UserProvider, AgentResolverInterface
 	 */
 	public function validateConfig(array $config)
 	{
-		$required = ['model', 'token_key'];
+		$required = [
+			'model',
+			'token_key',
+		];
 
 		foreach ($required as $require_key) {
 			if (! isset($config[$require_key])) {
@@ -63,6 +66,7 @@ class FuzzAuthUserProvider implements UserProvider, AgentResolverInterface
 	public function retrieveById($identifier)
 	{
 		$user_model = $this->user_model;
+
 		return $user_model::whereId($identifier)->first();
 	}
 

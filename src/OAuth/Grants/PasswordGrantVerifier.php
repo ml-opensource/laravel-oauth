@@ -16,6 +16,7 @@ class PasswordGrantVerifier
 	 * @var Config
 	 */
 	protected $config;
+
 	/**
 	 * @var Request
 	 */
@@ -135,11 +136,17 @@ class PasswordGrantVerifier
 		}
 
 		if (! $this->validateCredentials($username, $email, $password)) {
-			return ['scopes' => [], 'user_id' => false];
+			return [
+				'scopes'  => [],
+				'user_id' => false,
+			];
 		}
 
 		$accepted_scopes = $this->validateScopes();
 
-		return ['scopes' => $accepted_scopes, 'user_id' => $this->user->id];
+		return [
+			'scopes'  => $accepted_scopes,
+			'user_id' => $this->user->id,
+		];
 	}
 }
