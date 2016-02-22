@@ -5,9 +5,12 @@ namespace Fuzz\Auth\Tests;
 use Fuzz\Auth\Models\OauthClient;
 use Fuzz\Auth\OAuth\Grants\PasswordGrant;
 use Fuzz\Auth\OAuth\Grants\RefreshTokenGrant;
+use Fuzz\Auth\Tests\Http\FuzzAuthTestKernel;
 use Fuzz\Auth\Tests\Models\User;
 use Fuzz\Auth\Tests\Providers\RouteServiceProvider;
 use Fuzz\RestTests\BaseRestTestCase;
+use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
+use Illuminate\Contracts\Http\Kernel as LaravelKernel;
 use LucaDegasperi\OAuth2Server\OAuth2ServerServiceProvider;
 use LucaDegasperi\OAuth2Server\Storage\FluentStorageServiceProvider;
 use Mockery;
@@ -18,6 +21,11 @@ abstract class ApiTestCase extends BaseRestTestCase
 	use ApplicationTrait;
 
 	protected $artisan;
+
+	/**
+	 * @var \Illuminate\Contracts\Console\Kernel|\Fuzz\Auth\Tests\Http\FuzzAuthTestKernel
+	 */
+	protected $kernel;
 
 	/**
 	 * The base URL to use while testing the application.
@@ -43,7 +51,7 @@ abstract class ApiTestCase extends BaseRestTestCase
 			$this->refreshApplication();
 		}
 
-		$this->artisan = $this->app->make('Illuminate\Contracts\Console\Kernel');
+		$this->artisan = $this->app->make(ConsoleKernel::class);
 
 		$this->artisan->call(
 			'migrate', [
@@ -74,6 +82,20 @@ abstract class ApiTestCase extends BaseRestTestCase
 			],
 		]
 		);
+	}
+
+	/**
+	 * Resolve application HTTP Kernel implementation.
+	 *
+	 * @param  \Illuminate\Foundation\Application  $app
+	 *
+	 * @return void
+	 */
+	protected function resolveApplicationHttpKernel($app)
+	{
+		$app->singleton(LaravelKernel::class, FuzzAuthTestKernel::class);
+
+		$this->kernel = $app->make(LaravelKernel::class);
 	}
 
 	public function tearDown()

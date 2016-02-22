@@ -24,7 +24,7 @@ class AuthServiceProvider extends ServiceProvider
 				return new FuzzAuthUserProvider($config);
 		});
 
-		// Register an OAuthGuard to be used for our
+		// Register an OAuthGuard to be used
 		Auth::extend(
 			OAuthGuard::class, function ($app, $name, array $config) {
 				return new OAuthGuard(Auth::createUserProvider($config['provider']));

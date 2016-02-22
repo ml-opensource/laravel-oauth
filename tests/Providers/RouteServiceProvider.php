@@ -30,6 +30,18 @@ class RouteServiceProvider extends BaseRouteServiceProvider
 			$router->post(
 				'oauth/access_token', 'OAuthController@issueAccessToken'
 			);
+
+			$router->get(
+				'auth/authedRoute', ['middleware' => 'auth:api', 'uses' => 'AuthenticatedController@authedRoute']
+			);
+
+			$router->get(
+				'auth/noGuardRoute', ['middleware' => 'auth', 'uses' => 'AuthenticatedController@authedRoute']
+			);
+
+			$router->get(
+				'auth/notAuthedRoute', 'AuthenticatedController@notAuthedRoute'
+			);
 		});
 
 		$router->group(['namespace' => 'Fuzz\\Auth\\Tests\\Controllers', 'prefix' => Controller::API_VERSION], function (Router $router) {

@@ -19,23 +19,9 @@ class OAuthGuard implements Guard
 	protected $request;
 
 	/**
-	 * The name of the field on the request containing the API token.
-	 *
-	 * @var string
-	 */
-	protected $inputKey;
-
-	/**
-	 * The name of the token "column" in persistent storage.
-	 *
-	 * @var string
-	 */
-	protected $storageKey;
-
-	/**
 	 * Create a new authentication guard.
 	 *
-	 * @param  \Illuminate\Contracts\Auth\UserProvider  $provider
+	 * @param  \Illuminate\Contracts\Auth\UserProvider $provider
 	 */
 	public function __construct(UserProvider $provider)
 	{
@@ -43,7 +29,6 @@ class OAuthGuard implements Guard
 			throw new \LogicException(get_class($provider) . ' does not implement ' . AgentResolverInterface::class);
 		}
 		$this->provider = $provider;
-		$this->inputKey = 'access_token';
 	}
 
 	/**
