@@ -20,6 +20,11 @@ abstract class ApiTestCase extends BaseRestTestCase
 {
 	use ApplicationTrait;
 
+	/**
+	 * Artisan kernel storage
+	 *
+	 * @var \Illuminate\Contracts\Console\Kernel
+	 */
 	protected $artisan;
 
 	/**
@@ -41,10 +46,23 @@ abstract class ApiTestCase extends BaseRestTestCase
 	 */
 	public $api_version = '1.0';
 
+	/**
+	 * Token URI
+	 *
+	 * @var string
+	 */
 	public $oauth_url = 'oauth/access_token';
 
+	/**
+	 * OAuth client class storage
+	 *
+	 * @var string
+	 */
 	public $oauth_client_class = OAuthClient::class;
 
+	/**
+	 * Set up tests
+	 */
 	public function setUp()
 	{
 		if (! $this->app) {
@@ -61,6 +79,11 @@ abstract class ApiTestCase extends BaseRestTestCase
 		);
 	}
 
+	/**
+	 * Set up environment configurations
+	 *
+	 * @param $app
+	 */
 	protected function getEnvironmentSetUp($app)
 	{
 		$app['config']->set('database.default', 'testbench');
@@ -98,6 +121,9 @@ abstract class ApiTestCase extends BaseRestTestCase
 		$this->kernel = $app->make(LaravelKernel::class);
 	}
 
+	/**
+	 * Clean up
+	 */
 	public function tearDown()
 	{
 		$this->artisan->call('migrate:rollback', ['--database' => 'testbench']);
@@ -135,6 +161,11 @@ abstract class ApiTestCase extends BaseRestTestCase
 		];
 	}
 
+	/**
+	 * Return an oauth config
+	 *
+	 * @return array
+	 */
 	public function oauthConfig()
 	{
 		return [
