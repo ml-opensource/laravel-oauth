@@ -10,16 +10,6 @@ class OauthScope extends Model
 	public $incrementing = false;
 
 	/**
-	 * User relationship
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-	 */
-	public function users()
-	{
-		return $this->belongsToMany(User::class);
-	}
-
-	/**
 	 * Clients relationship
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
@@ -29,7 +19,12 @@ class OauthScope extends Model
 		return $this->belongsToMany(OauthClient::class, 'oauth_client_scopes', 'scope_id', 'client_id');
 	}
 
-	// @todo does this belong here?
+	/**
+	 * Provide a convenience method for attaching scopes to a user
+	 *
+	 * @param \Illuminate\Database\Eloquent\Model $user
+	 * @param array                               $scopes
+	 */
 	public static function attachToUser(Model $user, array $scopes)
 	{
 		$attach_scopes = [];
