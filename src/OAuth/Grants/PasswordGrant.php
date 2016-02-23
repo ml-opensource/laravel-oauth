@@ -2,9 +2,7 @@
 
 namespace Fuzz\Auth\OAuth\Grants;
 
-use Fuzz\Auth\Models\OauthScopeEntity;
-use Fuzz\Auth\Models\OauthTokenEntity;
-use League\OAuth2\Server\Entity\ScopeEntity;
+use League\OAuth2\Server\Entity\AccessTokenEntity;
 use League\OAuth2\Server\Grant\PasswordGrant as OauthPasswordGrant;
 use League\OAuth2\Server\Entity\ClientEntity;
 use League\OAuth2\Server\Entity\RefreshTokenEntity;
@@ -80,7 +78,7 @@ class PasswordGrant extends OauthPasswordGrant
 		$session->associateClient($client);
 
 		// Generate an access token
-		$accessToken = new OauthTokenEntity($this->server);
+		$accessToken = new AccessTokenEntity($this->server);
 		$accessToken->setId(SecureKey::generate());
 		$accessToken->setExpireTime($this->getAccessTokenTTL() + time());
 
@@ -121,59 +119,5 @@ class PasswordGrant extends OauthPasswordGrant
 		$response['scopes'] = array_keys($scopes);
 
 		return $response;
-	}
-
-	/**
-	 * Given a list of scopes, validate them and return an array of Scope entities
-	 *
-	 * @param string                                    $scopeParam  A string of scopes (e.g. "profile email birthday")
-	 * @param \League\OAuth2\Server\Entity\ClientEntity $client      Client entity
-	 * @param string|null                               $redirectUri The redirect URI to return the user to
-	 *
-	 * @return \League\OAuth2\Server\Entity\ScopeEntity[]
-	 *
-	 * @throws \League\OAuth2\Server\Exception\InvalidScopeException If scope is invalid, or no scopes passed when
-	 *                                                               required
-	 * @throws
-	 */
-	public function validateScopes($scopeParam = '', ClientEntity $client, $redirectUri = null)
-	{
-		$scopesList = explode($this->server->getScopeDelimiter(), $scopeParam);
-
-		for ($i = 0; $i < count($scopesList); $i++) {
-			$scopesList[$i] = trim($scopesList[$i]);
-			if ($scopesList[$i] === '') {
-				unset($scopesList[$i]); // Remove any junk scopes
-			}
-		}
-
-		if ($this->server->scopeParamRequired() === true
-			&& $this->server->getDefaultScope() === null
-			&& count($scopesList) === 0
-		) {
-			throw new Exception\InvalidRequestException('scope');
-		} elseif (count($scopesList) === 0 && $this->server->getDefaultScope() !== null) {
-			if (is_array($this->server->getDefaultScope())) {
-				$scopesList = $this->server->getDefaultScope();
-			} else {
-				$scopesList = [0 => $this->server->getDefaultScope()];
-			}
-		}
-
-		$scopes = [];
-
-		foreach ($scopesList as $scopeItem) {
-			$scope = $this->server->getScopeStorage()->get(
-				$scopeItem, $this->getIdentifier(), $client->getId()
-			);
-
-			if (($scope instanceof ScopeEntity) === false) {
-				throw new Exception\InvalidScopeException($scopeItem, $redirectUri);
-			}
-
-			$scopes[$scope->getId()] = new OauthScopeEntity($this->server, $scope);
-		}
-
-		return $scopes;
 	}
 }
