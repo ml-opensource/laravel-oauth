@@ -4,7 +4,8 @@
 	"require": {
 		"laravel/framework": "5.2.*",
 		"lucadegasperi/oauth2-server-laravel": "5.1.*",
-		"symfony/security-core": "3.0.*"
+		"symfony/security-core": "3.0.*",
+		"fuzz/magic-box": "refactor_less_dependent_on_fuzz_modules-dev"
 	},
 	"require-dev": {
 		"orchestra/testbench": "3.2.*",
@@ -24,6 +25,10 @@
 		"rest-tester": {
 			"type": "vcs",
 			"url": "git@gitlab.fuzzhq.com:web-modules/rest-tester.git"
+		},
+		"magic-box": {
+			"type": "vcs",
+			"url": "git@gitlab.fuzzhq.com:web-modules/magic-box.git"
 		}
 	},
 	"autoload": {
