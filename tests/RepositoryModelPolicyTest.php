@@ -17,6 +17,7 @@ use Fuzz\Auth\Tests\Providers\RouteServiceProvider;
 use Fuzz\MagicBox\EloquentRepository;
 use Fuzz\RestTests\AuthTraits\OAuthTrait;
 use Illuminate\Support\Facades\DB;
+use League\OAuth2\Server\Exception\AccessDeniedException;
 use LucaDegasperi\OAuth2Server\Facades\Authorizer;
 use LucaDegasperi\OAuth2Server\OAuth2ServerServiceProvider;
 use LucaDegasperi\OAuth2Server\Storage\FluentStorageServiceProvider;
@@ -219,6 +220,31 @@ class RepositoryModelPolicyTest extends ApiTestCase
 
 		$this->assertEquals(1, count($filters_applied));
 		$this->assertEquals('someFilter', $filters_applied[0]());
+	}
+
+	public function testItThrowsExceptionIfRequiredScopesMissing()
+	{
+		$this->setUpPolicyTest(['user']);
+
+		$policy = new PostPolicy;
+
+		Authorizer::shouldReceive('hasScope')->once()
+			->with('admin')->andReturn(false);
+
+		$this->setExpectedException(AccessDeniedException::class, 'The resource owner or authorization server denied the request.');
+		$policy->requireScopes('admin');
+	}
+
+	public function testItRequireScopesReturnsTrueIfRequiredScopesExist()
+	{
+		$this->setUpPolicyTest(['admin']);
+
+		$policy = new PostPolicy;
+
+		Authorizer::shouldReceive('hasScope')->once()
+			->with('admin')->andReturn(true);
+
+		$this->assertTrue($policy->requireScopes('admin'));
 	}
 
 	public function createUserInDatabase(array $attributes)

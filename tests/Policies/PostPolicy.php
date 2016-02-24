@@ -144,7 +144,7 @@ class PostPolicy extends RepositoryModelPolicy
 	 */
 	public function getFilters()
 	{
-		// Doesn't matter, this is ultimately up to the implementation.
+		// Doesn't matter, this is ultimately up to the policy implementation.
 		// We only care that the filters get applied
 		return [
 			'someFilter' => function () {
