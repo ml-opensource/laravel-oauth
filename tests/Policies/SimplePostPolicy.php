@@ -26,9 +26,10 @@ class SimplePostPolicy extends RepositoryModelPolicy
 	 *
 	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function show(AgentInterface $user, Repository $repository)
+	public function show(AgentInterface $user, Repository $repository, Model $object)
 	{
 		return $this->requestHasOneOfScopes('user', 'admin');
 	}
@@ -38,9 +39,10 @@ class SimplePostPolicy extends RepositoryModelPolicy
 	 *
 	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function update(AgentInterface $user, Repository $repository)
+	public function update(AgentInterface $user, Repository $repository, Model $object)
 	{
 		return $this->requestHasOneOfScopes('admin');
 	}
@@ -50,9 +52,10 @@ class SimplePostPolicy extends RepositoryModelPolicy
 	 *
 	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function store(AgentInterface $user, Repository $repository)
+	public function store(AgentInterface $user, Repository $repository, Model $object = null)
 	{
 		return $this->requestHasOneOfScopes('admin');
 	}
@@ -62,9 +65,10 @@ class SimplePostPolicy extends RepositoryModelPolicy
 	 *
 	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function destroy(AgentInterface $user, Repository $repository)
+	public function destroy(AgentInterface $user, Repository $repository, Model $object)
 	{
 		return $this->requestHasOneOfScopes('admin');
 	}

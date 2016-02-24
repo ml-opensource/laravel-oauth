@@ -32,9 +32,10 @@ class PostPolicy extends RepositoryModelPolicy
 	 *
 	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function show(AgentInterface $user, Repository $repository)
+	public function show(AgentInterface $user, Repository $repository, Model $object)
 	{
 		if (! $this->requestHasOneOfScopes('user', 'admin')) {
 			return false;
@@ -50,11 +51,12 @@ class PostPolicy extends RepositoryModelPolicy
 	 *
 	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function update(AgentInterface $user, Repository $repository)
+	public function update(AgentInterface $user, Repository $repository, Model $object)
 	{
-		if (! $this->requestHasOneOfScopes('admin')) {
+		if (! $this->requestHasOneOfScopes('admin') || $this->isObjectOwner($user, $repository, $object)) {
 			return false;
 		}
 
@@ -68,9 +70,10 @@ class PostPolicy extends RepositoryModelPolicy
 	 *
 	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function store(AgentInterface $user, Repository $repository)
+	public function store(AgentInterface $user, Repository $repository, Model $object = null)
 	{
 		if (! $this->requestHasOneOfScopes('admin')) {
 			return false;
@@ -86,9 +89,10 @@ class PostPolicy extends RepositoryModelPolicy
 	 *
 	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function destroy(AgentInterface $user, Repository $repository)
+	public function destroy(AgentInterface $user, Repository $repository, Model $object)
 	{
 		if (! $this->requestHasOneOfScopes('admin')) {
 			return false;
