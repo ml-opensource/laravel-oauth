@@ -1,5 +1,5 @@
 {
-	"name": "fuzz/auth",
+	"name": "fuzz/laravel-oauth",
 	"description": "auth",
 	"require": {
 		"laravel/framework": "5.2.*",
