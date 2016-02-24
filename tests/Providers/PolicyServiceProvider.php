@@ -1,6 +1,6 @@
 <?php
 
-namespace Fuzz\Auth\Providers;
+namespace Fuzz\Auth\Tests\Providers;
 
 use Fuzz\Auth\Tests\Models\Post;
 use Fuzz\Auth\Tests\Policies\SimplePostPolicy;
