@@ -109,7 +109,7 @@ class PostPolicy extends RepositoryModelPolicy
 	 */
 	public function isObjectOwner(AgentInterface $user, Repository $repository, Model $object)
 	{
-		return ($object->user_id === $user->id) || $this->isObjectMaster($user, $repository, $object);
+		return ($object->user_id === $user->getKey()) || $this->isObjectMaster($user, $repository, $object);
 	}
 
 	/**

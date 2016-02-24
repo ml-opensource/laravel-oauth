@@ -5,6 +5,20 @@ namespace Fuzz\Auth\Models;
 interface AgentInterface
 {
 	/**
+	 * Find the agent's primary key value
+	 *
+	 * @return mixed
+	 */
+	public function getKey();
+
+	/**
+	 * Get the primary key for the model.
+	 *
+	 * @return string
+	 */
+	public function getKeyName();
+
+	/**
 	 * Determine whether this agent (not request) has access to certain scopes
 	 *
 	 * NOTE: not scopes that belong to the request token
@@ -28,20 +42,4 @@ interface AgentInterface
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function scopes();
-
-	/**
-	 * Attach a password to the user.
-	 *
-	 * @param  string $value
-	 * @return void
-	 */
-	public function setPasswordAttribute($value);
-
-	/**
-	 * Check if a password is valid.
-	 *
-	 * @param  string $password
-	 * @return boolean
-	 */
-	public function checkPassword($password);
 }
