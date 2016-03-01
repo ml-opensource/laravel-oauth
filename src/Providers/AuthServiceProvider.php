@@ -19,7 +19,6 @@ class AuthServiceProvider extends ServiceProvider
 	public function register()
 	{
 		$this->registerOAuthProviders();
-		$this->registerCommands();
 	}
 
 	/**
