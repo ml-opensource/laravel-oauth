@@ -2,10 +2,12 @@
 
 namespace Fuzz\Auth\Providers;
 
-use Illuminate\Contracts\Auth\Access\Gate as GateContract;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Auth;
 use Fuzz\Auth\Guards\OAuthGuard;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\Auth\Access\Gate as GateContract;
+use LucaDegasperi\OAuth2Server\OAuth2ServerServiceProvider;
+use LucaDegasperi\OAuth2Server\Storage\FluentStorageServiceProvider;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
