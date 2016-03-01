@@ -10,6 +10,17 @@ use Fuzz\Auth\Guards\OAuthGuard;
 class AuthServiceProvider extends ServiceProvider
 {
 	/**
+	 * Register the service provider.
+	 *
+	 * @return void
+	 */
+	public function register()
+	{
+		$this->registerOAuthProviders();
+		$this->registerCommands();
+	}
+
+	/**
 	 * Register any application authentication / authorization services.
 	 *
 	 * @param  \Illuminate\Contracts\Auth\Access\Gate $gate
@@ -29,5 +40,17 @@ class AuthServiceProvider extends ServiceProvider
 			OAuthGuard::class, function ($app, $name, array $config) {
 				return new OAuthGuard(Auth::createUserProvider($config['provider']));
 		});
+	}
+
+	/**
+	 * Register the service providers associated with the
+	 * lucadegasperi/oauth2-server-laravel package.
+	 *
+	 * @return void
+	 */
+	protected function registerOAuthProviders()
+	{
+		$this->app->register(new FluentStorageServiceProvider($this->app));
+		$this->app->register(new OAuth2ServerServiceProvider($this->app));
 	}
 }
