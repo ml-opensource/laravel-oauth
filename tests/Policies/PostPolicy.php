@@ -156,4 +156,36 @@ class PostPolicy extends RepositoryModelPolicy
 			},
 		];
 	}
+
+	/**
+	 * Determine if the user can update this repository
+	 *
+	 * @param \Fuzz\Auth\Models\AgentInterface    $user
+	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
+	 * @param \Illuminate\Database\Eloquent\Model $parent
+	 * @param array                               $input
+	 * @return bool
+	 */
+	public function updateNested(AgentInterface $user, Repository $repository, Model $object, Model $parent, array &$input)
+	{
+		// Can always update nested
+		return true;
+	}
+
+	/**
+	 * Determine if the user can store this repository
+	 *
+	 * @param \Fuzz\Auth\Models\AgentInterface         $user
+	 * @param \Fuzz\MagicBox\Contracts\Repository      $repository
+	 * @param \Illuminate\Database\Eloquent\Model|null $object
+	 * @param \Illuminate\Database\Eloquent\Model      $parent
+	 * @param array                                    $input
+	 * @return bool
+	 */
+	public function storeNested(AgentInterface $user, Repository $repository, Model $object = null, Model $parent = null, array &$input)
+	{
+		// Can always create nested
+		return true;
+	}
 }

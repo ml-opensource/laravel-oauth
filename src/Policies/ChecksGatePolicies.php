@@ -12,6 +12,13 @@ trait ChecksGatePolicies
 	private $policy_class;
 
 	/**
+	 * Policy storage
+	 *
+	 * @var \Fuzz\Auth\Policies\RepositoryModelPolicyInterface|mixed
+	 */
+	public $policy;
+
+	/**
 	 * Set the policy class for this class
 	 *
 	 * @param string $policy_class
@@ -36,10 +43,14 @@ trait ChecksGatePolicies
 	/**
 	 * Get this class' policy
 	 *
-	 * @return mixed
+	 * @return \Fuzz\Auth\Policies\RepositoryModelPolicyInterface|mixed
 	 */
 	public function policy()
 	{
-		return policy($this->policy_class);
+		if (! is_null($this->policy)) {
+			return $this->policy;
+		}
+
+		return $this->policy = policy($this->policy_class);
 	}
 }

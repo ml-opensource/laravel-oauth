@@ -120,4 +120,34 @@ class SimplePostPolicy extends RepositoryModelPolicy
 	{
 		// TODO: Implement getFilters() method.
 	}
+
+	/**
+	 * Determine if the user can update this repository
+	 *
+	 * @param \Fuzz\Auth\Models\AgentInterface    $user
+	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @param \Illuminate\Database\Eloquent\Model $object
+	 * @param \Illuminate\Database\Eloquent\Model $parent
+	 * @param array                               $input
+	 * @return bool
+	 */
+	public function updateNested(AgentInterface $user, Repository $repository, Model $object, Model $parent, array &$input)
+	{
+		// TODO: Implement updateNested() method.
+	}
+
+	/**
+	 * Determine if the user can store this repository
+	 *
+	 * @param \Fuzz\Auth\Models\AgentInterface         $user
+	 * @param \Fuzz\MagicBox\Contracts\Repository      $repository
+	 * @param \Illuminate\Database\Eloquent\Model|null $object
+	 * @param \Illuminate\Database\Eloquent\Model      $parent
+	 * @param array                                    $input
+	 * @return bool
+	 */
+	public function storeNested(AgentInterface $user, Repository $repository, Model $object = null, Model $parent = null, array &$input)
+	{
+		// TODO: Implement storeNested() method.
+	}
 }
