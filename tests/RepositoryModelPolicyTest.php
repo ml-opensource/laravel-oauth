@@ -57,7 +57,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('user')->andReturn(true);
 
-		$this->assertTrue($policy->index($user, $repository));
+		$this->assertTrue($policy->index($repository));
 	}
 
 	public function testSimplePolicyCanDenyForIndex()
@@ -73,7 +73,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(false);
 
-		$this->assertFalse($policy->index($user, $repository));
+		$this->assertFalse($policy->index($repository));
 	}
 
 	public function testSimplePolicyCanGrantForShow()
@@ -87,7 +87,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('user')->andReturn(true);
 
-		$this->assertTrue($policy->show($user, $repository, $post));
+		$this->assertTrue($policy->show($repository));
 	}
 
 	public function testSimplePolicyCanDenyForShow()
@@ -104,7 +104,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(false);
 
-		$this->assertFalse($policy->show($user, $repository, $post));
+		$this->assertFalse($policy->show($repository));
 	}
 
 	public function testSimplePolicyCanGrantForUpdate()
@@ -121,7 +121,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(true);
 
-		$this->assertTrue($policy->update($user, $repository, $post));
+		$this->assertTrue($policy->update($repository));
 	}
 
 	public function testSimplePolicyCanDenyForUpdate()
@@ -138,7 +138,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(false);
 
-		$this->assertFalse($policy->update($user, $repository, $post));
+		$this->assertFalse($policy->update($repository));
 	}
 
 	public function testSimplePolicyCanGrantForStore()
@@ -154,7 +154,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(true);
 
-		$this->assertTrue($policy->store($user, $repository));
+		$this->assertTrue($policy->store($repository));
 	}
 
 	public function testSimplePolicyCanDenyForStore()
@@ -170,7 +170,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(false);
 
-		$this->assertFalse($policy->store($user, $repository));
+		$this->assertFalse($policy->store($repository));
 	}
 
 	public function testSimplePolicyCanGrantForDestroy()
@@ -187,7 +187,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(true);
 
-		$this->assertTrue($policy->destroy($user, $repository, $post));
+		$this->assertTrue($policy->destroy($repository));
 	}
 
 	public function testSimplePolicyCanDenyForDestroy()
@@ -204,7 +204,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(false);
 
-		$this->assertFalse($policy->destroy($user, $repository, $post));
+		$this->assertFalse($policy->destroy($repository));
 	}
 
 	public function testRepositoryModelPolicyAppliesFilters()
@@ -220,7 +220,7 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(true);
 
-		$this->assertTrue($policy->index($user, $repository));
+		$this->assertTrue($policy->index($repository));
 
 		$filters_applied = $repository->getFilters();
 

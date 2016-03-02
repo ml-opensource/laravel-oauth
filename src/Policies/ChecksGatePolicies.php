@@ -9,7 +9,7 @@ trait ChecksGatePolicies
 	 *
 	 * @var string
 	 */
-	private $policy_class;
+	public $policy_class;
 
 	/**
 	 * Policy storage

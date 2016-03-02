@@ -4,6 +4,7 @@ namespace Fuzz\Auth\Tests\Policies;
 
 use Fuzz\Auth\Models\AgentInterface;
 use Fuzz\Auth\Policies\RepositoryModelPolicy;
+use Fuzz\Auth\Tests\Models\User;
 use Fuzz\MagicBox\Contracts\Repository;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,11 +13,10 @@ class PostPolicy extends RepositoryModelPolicy
 	/**
 	 * Determine if the user can access an index of the repository
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
 	 * @return bool
 	 */
-	public function index(AgentInterface $user, Repository $repository)
+	public function index(Repository $repository)
 	{
 		if (! $this->requestHasOneOfScopes('user', 'admin')) {
 			return false;
@@ -30,12 +30,10 @@ class PostPolicy extends RepositoryModelPolicy
 	/**
 	 * Determine if the user can show this repository
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
-	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function show(AgentInterface $user, Repository $repository, Model $object)
+	public function show(Repository $repository)
 	{
 		if (! $this->requestHasOneOfScopes('user', 'admin')) {
 			return false;
@@ -49,14 +47,12 @@ class PostPolicy extends RepositoryModelPolicy
 	/**
 	 * Determine if the user can update this repository
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
-	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function update(AgentInterface $user, Repository $repository, Model $object)
+	public function update(Repository $repository)
 	{
-		if (! $this->requestHasOneOfScopes('admin') || $this->isObjectOwner($user, $repository, $object)) {
+		if (! $this->requestHasOneOfScopes('admin') || $this->isObjectOwner($repository, $repository->read())) {
 			return false;
 		}
 
@@ -68,12 +64,10 @@ class PostPolicy extends RepositoryModelPolicy
 	/**
 	 * Determine if the user can store this repository
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
-	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function store(AgentInterface $user, Repository $repository, Model $object = null)
+	public function store(Repository $repository)
 	{
 		if (! $this->requestHasOneOfScopes('admin')) {
 			return false;
@@ -87,12 +81,10 @@ class PostPolicy extends RepositoryModelPolicy
 	/**
 	 * Determine if the user can destroy this repository
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
-	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function destroy(AgentInterface $user, Repository $repository, Model $object)
+	public function destroy(Repository $repository)
 	{
 		if (! $this->requestHasOneOfScopes('admin')) {
 			return false;
@@ -106,25 +98,24 @@ class PostPolicy extends RepositoryModelPolicy
 	/**
 	 * Determine if this user is an owner of this object
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
 	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function isObjectOwner(AgentInterface $user, Repository $repository, Model $object)
+	public function isObjectOwner(Repository $repository, Model $object)
 	{
-		return ($object->user_id === $user->getKey()) || $this->isObjectMaster($user, $repository, $object);
+		$user = User::whereUsername('aNewTestUser')->first();
+		return ($object->user_id === $user->getKey()) || $this->isObjectMaster($repository, $repository->read());
 	}
 
 	/**
 	 * Determine if this user is a master of this repository
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
 	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @return bool
 	 */
-	public function isObjectMaster(AgentInterface $user, Repository $repository, Model $object)
+	public function isObjectMaster(Repository $repository, Model $object)
 	{
 		return $this->requestHasOneOfScopes('admin');
 	}
@@ -132,11 +123,10 @@ class PostPolicy extends RepositoryModelPolicy
 	/**
 	 * Determine if this user is a master of this collection repository
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
 	 * @return bool
 	 */
-	public function isCollectionMaster(AgentInterface $user, Repository $repository)
+	public function isCollectionMaster(Repository $repository)
 	{
 		return $this->requestHasOneOfScopes('admin');
 	}
@@ -160,14 +150,13 @@ class PostPolicy extends RepositoryModelPolicy
 	/**
 	 * Determine if the user can update this repository
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface    $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
 	 * @param \Illuminate\Database\Eloquent\Model $object
 	 * @param \Illuminate\Database\Eloquent\Model $parent
 	 * @param array                               $input
 	 * @return bool
 	 */
-	public function updateNested(AgentInterface $user, Repository $repository, Model $object, Model $parent, array &$input)
+	public function updateNested(Repository $repository, Model $object, Model $parent, array &$input)
 	{
 		// Can always update nested
 		return true;
@@ -176,16 +165,26 @@ class PostPolicy extends RepositoryModelPolicy
 	/**
 	 * Determine if the user can store this repository
 	 *
-	 * @param \Fuzz\Auth\Models\AgentInterface         $user
 	 * @param \Fuzz\MagicBox\Contracts\Repository      $repository
 	 * @param \Illuminate\Database\Eloquent\Model|null $object
 	 * @param \Illuminate\Database\Eloquent\Model      $parent
 	 * @param array                                    $input
 	 * @return bool
 	 */
-	public function storeNested(AgentInterface $user, Repository $repository, Model $object = null, Model $parent = null, array &$input)
+	public function storeNested(Repository $repository, Model $object = null, Model $parent = null, array &$input)
 	{
 		// Can always create nested
+		return true;
+	}
+
+	/**
+	 * Determine if this request can be unpaginated
+	 *
+	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @return bool
+	 */
+	public function unpaginatedIndex(Repository $repository)
+	{
 		return true;
 	}
 }

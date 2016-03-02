@@ -29,7 +29,7 @@ class AuthServiceProvider extends ServiceProvider
 	 */
 	public function boot(GateContract $gate)
 	{
-		$this->registerPolicies($gate); // @todo not needed?
+		$this->registerPolicies($gate);
 
 		Auth::provider(
 			'oauth', function ($app, array $config) {

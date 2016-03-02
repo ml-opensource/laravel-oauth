@@ -5,7 +5,7 @@ namespace Fuzz\Auth\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use League\OAuth2\Server\Exception\AccessDeniedException;
+use League\OAuth2\Server\Exception\InvalidRequestException;
 
 class OAuthenticateMiddleware
 {
@@ -16,7 +16,7 @@ class OAuthenticateMiddleware
 	 * @param \Closure                 $next
 	 * @param null|string              $guard
 	 * @return mixed
-	 * @throws \League\OAuth2\Server\Exception\AccessDeniedException
+	 * @throws \League\OAuth2\Server\Exception\InvalidRequestException
 	 */
 	public function handle(Request $request, Closure $next, $guard = null)
 	{
@@ -31,7 +31,7 @@ class OAuthenticateMiddleware
 
 		// If above still resulted in a null user throw an error
 		if (is_null($user)) {
-			throw new AccessDeniedException;
+			throw new InvalidRequestException('access token');
 		}
 
 		return $next($request);

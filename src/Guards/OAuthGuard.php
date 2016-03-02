@@ -6,6 +6,7 @@ use Fuzz\Auth\Models\AgentResolverInterface;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
+use League\OAuth2\Server\Exception\InvalidRequestException;
 
 class OAuthGuard implements Guard
 {
@@ -47,7 +48,11 @@ class OAuthGuard implements Guard
 			return $this->user;
 		}
 
-		return $this->user = $this->provider->resolveAppAgent();
+		try {
+			return $this->user = $this->provider->resolveAppAgent();
+		} catch (InvalidRequestException $e) {
+			return $this->user = null;
+		}
 	}
 
 	/**
