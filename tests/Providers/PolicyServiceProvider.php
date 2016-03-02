@@ -3,6 +3,7 @@
 namespace Fuzz\Auth\Tests\Providers;
 
 use Fuzz\Auth\Tests\Models\Post;
+use Fuzz\Auth\Tests\Policies\PostPolicy;
 use Fuzz\Auth\Tests\Policies\SimplePostPolicy;
 use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -16,6 +17,7 @@ class PolicyServiceProvider extends ServiceProvider
 	 */
 	protected $policies = [
 		Post::class => SimplePostPolicy::class,
+		'TestPostClass' => PostPolicy::class,
 	];
 
 	/**

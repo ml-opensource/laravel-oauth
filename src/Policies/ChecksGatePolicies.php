@@ -22,12 +22,12 @@ trait ChecksGatePolicies
 	 * Set the policy class for this class
 	 *
 	 * @param string $policy_class
-	 * @return $this
+	 * @return \Fuzz\Auth\Policies\RepositoryModelPolicyInterface|mixed
 	 */
 	public function setPolicyClass($policy_class)
 	{
 		$this->policy_class = $policy_class;
-		return $this;
+		return $this->policy(true);
 	}
 
 	/**
@@ -43,11 +43,12 @@ trait ChecksGatePolicies
 	/**
 	 * Get this class' policy
 	 *
+	 * @param bool $force_new
 	 * @return \Fuzz\Auth\Policies\RepositoryModelPolicyInterface|mixed
 	 */
-	public function policy()
+	public function policy($force_new = false)
 	{
-		if (! is_null($this->policy)) {
+		if ((! $force_new) && (! is_null($this->policy))) {
 			return $this->policy;
 		}
 

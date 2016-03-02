@@ -47,6 +47,15 @@ class RepositoryModelPolicyTest extends ApiTestCase
 		$this->assertTrue($this->policy() instanceof SimplePostPolicy);
 	}
 
+	public function testItCanForceNewPolicyInstance()
+	{
+		$this->setPolicyClass(Post::class);
+		$this->assertTrue($this->policy() instanceof SimplePostPolicy);
+
+		$this->setPolicyClass('TestPostClass');
+		$this->assertTrue($this->policy() instanceof PostPolicy);
+	}
+
 	public function testSimplePolicyCanGrantForIndex()
 	{
 		$user = $this->setUpPolicyTest(['user']);
