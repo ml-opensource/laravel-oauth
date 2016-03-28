@@ -58,7 +58,7 @@ class PasswordGrantVerifier
 	 * @param $password
 	 * @return bool
 	 */
-	private function validateCredentials($username, $email, $password)
+	public function validateCredentials($username, $email, $password)
 	{
 		$user_model = $this->user_model;
 		if (! ((new $user_model) instanceof AgentInterface)) {
@@ -90,7 +90,7 @@ class PasswordGrantVerifier
 	 * @throws InvalidRequestException
 	 * @throws InvalidScopeException
 	 */
-	private function validateScopes()
+	public function validateScopes()
 	{
 		$scopes_list = $this->request->get('scope');
 
