@@ -1,11 +1,12 @@
 {
 	"name": "fuzz/laravel-oauth",
 	"description": "auth",
+	"license": "MIT",
 	"require": {
 		"laravel/framework": "5.2.*",
 		"lucadegasperi/oauth2-server-laravel": "5.1.*",
 		"symfony/security-core": "3.0.*",
-		"fuzz/magic-box": "refactor_less_dependent_on_fuzz_modules-dev"
+		"fuzz/magic-box": "1.1.*"
 	},
 	"require-dev": {
 		"orchestra/testbench": "3.2.*",
@@ -13,7 +14,7 @@
 		"mockery/mockery": "0.9.*",
 		"phpunit/phpunit": "~4.0",
 		"doctrine/dbal": "~2.3",
-		"fuzz/rest-tester": "dev-master"
+		"fuzz/rest-tester": "1.0.*"
 	},
 	"authors": [
 		{
@@ -21,16 +22,6 @@
 			"email": "fuzzweb@fuzzproductions.com"
 		}
 	],
-	"repositories": {
-		"rest-tester": {
-			"type": "vcs",
-			"url": "git@gitlab.fuzzhq.com:web-modules/rest-tester.git"
-		},
-		"magic-box": {
-			"type": "vcs",
-			"url": "git@gitlab.fuzzhq.com:web-modules/magic-box.git"
-		}
-	},
 	"autoload": {
 		"psr-4": {
 			"Fuzz\\Auth\\": "src/",
