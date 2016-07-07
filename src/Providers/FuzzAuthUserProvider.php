@@ -79,7 +79,6 @@ class FuzzAuthUserProvider implements UserProvider, AgentResolverInterface
 	 */
 	public function retrieveByToken($identifier, $token)
 	{
-		// @todo should this search by token or for the request?
 		if (Authorizer::validateAccessToken(false, $token)) {
 			return $this->retrieveById(Authorizer::getResourceOwnerId());
 		}

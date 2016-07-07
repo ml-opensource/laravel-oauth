@@ -1,6 +1,6 @@
 Laravel OAuth
 ==============
-An OAuth wrapper to bridge `lucadegasperi/oauth2-server-laravel` and Laravel's authentication system
+An OAuth wrapper to bridge `lucadegasperi/oauth2-server-laravel` and Laravel's authentication system while providing optional support for `fuzz/magic-box` repositories
 
 ## Setup
 1. Require the composer package
@@ -47,14 +47,14 @@ An OAuth wrapper to bridge `lucadegasperi/oauth2-server-laravel` and Laravel's a
 	'providers' => [
 	    'users' => [
 	        'driver' => 'oauth',
-	        'model' => \Crub\User::class,
+	        'model' => \App\User::class,
 	        'token_key' => 'access_token',
 	    ],
 	],
 	```
 
 1. Create `app/Http/Middleware/OAuthMiddleware.php` and extend `Fuzz\Auth\Middleware\OAuthenticateMiddleware`. Add it to the `$routeMiddleware` array in `app/Http/Kernel.php
-1. Your User class should implement the `Fuzz\Auth\Models\AgentInterface` and `Illuminate\Contracts\Auth\Authenticatable` their required methods
+1. Your User class should implement the `Fuzz\Auth\Models\AgentInterface` and `Illuminate\Contracts\Auth\Authenticatable` and their required methods
 
 ## Usage
 ### Protecting routes
@@ -69,7 +69,7 @@ $router->group(
 Within any authenticated route, you can use all the default Laravel `Auth` methods such as `Auth::user()` to resolve the currently authenticated user. `lucadegasperi/oauth2-server-laravel` provides a way to protect routes based on scope, but you can also use `Fuzz\Auth\Policies\RepositoryModelPolicy@requireScopes` to throw `League\OAuth2\Server\Exception\AccessDeniedException` exceptions when a user does not have the required scopes.
 
 ### Protecting resources
-Laravel OAuth comes with a base `Fuzz\Auth\Policies\RepositoryModelPolicy` but you may create your own (implementing the `Fuzz\Auth\Policies\RepositoryModelPolicyInterface` might be helpful. Extending `Fuzz\Auth\Policies\RepositoryModelPolicy` will provide some base methods to ease writing policies for repositories.
+Laravel OAuth comes with a base `Fuzz\Auth\Policies\RepositoryModelPolicy` but you may create your own (implementing the `Fuzz\Auth\Policies\RepositoryModelPolicyInterface` might be helpful). Extending `Fuzz\Auth\Policies\RepositoryModelPolicy` will provide some base methods to ease writing policies for repositories.
 
 Once a policy is set up and mapped to its model class, you may use it to check user permissions according to your policy:
 
@@ -82,8 +82,9 @@ Once a policy is set up and mapped to its model class, you may use it to check u
 ### Resolving the current user
 All of Laravel's `Auth` methods will work, so resolving the current user is as simple as `$user = Auth::user()`. `https://laravel.com/docs/5.2/authentication`.
 
-`Auth` will use your default guard unless specified. A typical guard set up for an OAuth specced API would be having one for users accessing via a client and another for client-only requests. `Auth` provides a way to Currently there is only `Fuzz\Auth\Guards\OAuthGuard` which is responsible for resolving the user for a request.
+`Auth` will use your default guard unless specified. A typical guard set up for an OAuth specced API would be having one for users accessing via a client and another for client-only requests. Currently there is only `Fuzz\Auth\Guards\OAuthGuard` which is responsible for resolving the user for a request.
 
 
 ## TODOs
+1. Separate `fuzz/laravel-oauth` from `fuzz/magic-box`
 1. Support client requests in their own guard and be compatible with the current user `OAuthGuard`

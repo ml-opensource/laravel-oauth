@@ -2,7 +2,6 @@
 
 namespace Fuzz\Auth\Tests\Policies;
 
-use Fuzz\Auth\Models\AgentInterface;
 use Fuzz\Auth\Policies\RepositoryModelPolicy;
 use Fuzz\Auth\Tests\Models\User;
 use Fuzz\MagicBox\Contracts\Repository;
