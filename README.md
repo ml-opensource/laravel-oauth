@@ -1,5 +1,5 @@
-Laravel OAuth
-==============
+Laravel OAuth [![Build Status](https://img.shields.io/travis/fuzz-productions/laravel-oauth/master.svg?style=flat)](https://travis-ci.org/fuzz-productions/laravel-oauth)
+=========================================================================================================================================================================
 An OAuth wrapper to bridge `lucadegasperi/oauth2-server-laravel` and Laravel's authentication system while providing optional support for `fuzz/magic-box` repositories
 
 ## Setup
