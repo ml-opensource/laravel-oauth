@@ -2,6 +2,7 @@
 
 namespace Fuzz\Auth\Models\Traits;
 
+use Fuzz\Auth\Providers\FuzzAuthUserProvider;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -78,7 +79,7 @@ trait PasswordableTrait
 		if ($this->checkPasswordToken($password_token)) {
 			$this->password                     = $new_password;
 			$this->attributes['password_token'] = null;
-			$this->revokeSessionsForOwnerTypeAndId('user', $this->{$this->getKeyName()});
+			FuzzAuthUserProvider::revokeSessionsForOwnerTypeAndId('user', $this->{$this->getKey()});
 
 			return true;
 		}
