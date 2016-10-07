@@ -5,11 +5,13 @@ namespace Fuzz\Auth\Tests;
 use Fuzz\Auth\Models\OauthClient;
 use Fuzz\Auth\OAuth\Grants\PasswordGrant;
 use Fuzz\Auth\OAuth\Grants\RefreshTokenGrant;
+use Fuzz\Auth\Tests\Exceptions\Handler;
 use Fuzz\Auth\Tests\Http\FuzzAuthTestKernel;
 use Fuzz\Auth\Tests\Models\User;
 use Fuzz\Auth\Tests\Providers\RouteServiceProvider;
 use Fuzz\RestTests\BaseRestTestCase;
 use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Http\Kernel as LaravelKernel;
 use LucaDegasperi\OAuth2Server\OAuth2ServerServiceProvider;
 use LucaDegasperi\OAuth2Server\Storage\FluentStorageServiceProvider;
@@ -103,8 +105,11 @@ abstract class ApiTestCase extends BaseRestTestCase
 				'model'     => User::class,
 				'token_key' => 'access_token',
 			],
-		]
-		);
+		]);
+
+		// We don't want to use the testbench exception handler because it doesn't actually throw an exception our tests
+		// can catch
+		$app->bind(ExceptionHandler::class, Handler::class);
 	}
 
 	/**
@@ -126,7 +131,6 @@ abstract class ApiTestCase extends BaseRestTestCase
 	 */
 	public function tearDown()
 	{
-		$this->artisan->call('migrate:rollback', ['--database' => 'testbench']);
 		if (class_exists('Mockery')) {
 			Mockery::close();
 		}

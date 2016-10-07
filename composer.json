@@ -3,13 +3,13 @@
 	"description": "auth",
 	"license": "MIT",
 	"require": {
-		"laravel/framework": "5.2.*",
-		"lucadegasperi/oauth2-server-laravel": "5.1.*",
+		"laravel/framework": "5.3.*",
+		"lucadegasperi/oauth2-server-laravel": "5.2.*",
 		"symfony/security-core": "3.0.*",
-		"fuzz/magic-box": "1.1.*"
+		"fuzz/magic-box": "dev-feature_support_laravel_53"
 	},
 	"require-dev": {
-		"orchestra/testbench": "3.2.*",
+		"orchestra/testbench": "3.3.*",
 		"fzaninotto/faker": "~1.4",
 		"mockery/mockery": "0.9.*",
 		"phpunit/phpunit": "~4.0",

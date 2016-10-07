@@ -106,7 +106,7 @@ class PasswordGrantVerifier
 			}
 		}
 
-		$user_scopes = $this->user->scopes->lists('id')->toArray();
+		$user_scopes = $this->user->scopes->pluck('id')->toArray();
 
 		if ($this->exception_on_invalid_scope || count($user_scopes) === 0) {
 			// Diff the user's available scopes with the currently requested scopes
