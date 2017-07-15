@@ -3,10 +3,10 @@
 	"description": "auth",
 	"license": "MIT",
 	"require": {
-		"laravel/framework": "5.3.*",
+		"laravel/framework": "5.1.* || 5.2.* || 5.3.* || 5.4.* || 5.5.*",
 		"lucadegasperi/oauth2-server-laravel": "5.2.*",
 		"symfony/security-core": "3.0.*",
-		"fuzz/magic-box": "dev-feature_support_laravel_53"
+		"fuzz/magic-box": "1.2.x-dev as 1.2"
 	},
 	"require-dev": {
 		"orchestra/testbench": "3.3.*",
@@ -28,6 +28,17 @@
 			"Fuzz\\Auth\\Tests\\": "tests/",
 			"Fuzz\\Auth\\Tests\\Seeds\\": "tests/seeds"
 		}
+	},
+	"scripts": {
+		"test": [
+			"vendor/bin/phpunit"
+		],
+		"test-coverage": [
+			"vendor/bin/phpunit --coverage-html tests/coverage"
+		],
+		"open-coverage": [
+			"open -a \"Google Chrome\" tests/coverage/index.html"
+		]
 	},
 	"minimum-stability": "dev"
 }
