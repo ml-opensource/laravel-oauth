@@ -2,44 +2,24 @@
 
 namespace Fuzz\Auth\Tests;
 
-use Carbon\Carbon;
-use Fuzz\Auth\Models\OauthClient;
-use Fuzz\Auth\Models\OauthScope;
 use Fuzz\Auth\Models\Traits\ChecksScopes;
-use Fuzz\Auth\Tests\Models\User;
-use Fuzz\RestTests\AuthTraits\OAuthTrait;
-use Illuminate\Support\Facades\DB;
 use LucaDegasperi\OAuth2Server\Facades\Authorizer;
+use LucaDegasperi\OAuth2Server\OAuth2ServerServiceProvider;
+use LucaDegasperi\OAuth2Server\Storage\FluentStorageServiceProvider;
 
-class ChecksScopesTest extends ApiTestCase
+class ChecksScopesTest extends ApplicationTestCase
 {
-	use OAuthTrait;
-
-	public function setUpScopeCheckTests(array $with_scopes)
+	protected function getPackageProviders($app)
 	{
-		$this->setUpOauthTest();
-
-		$user           = new User;
-		$user->username = 'aNewTestUser';
-		$user->password = 'aUserPassword';
-		$user->save();
-
-		OauthScope::attachToUser(
-			$user, $with_scopes
-		);
-
-		return $this->authenticate(
-			$user->username, 'aUserPassword', [
-			'user',
-			'admin',
-		], $this->getClient());
+		return [
+			FluentStorageServiceProvider::class,
+			OAuth2ServerServiceProvider::class,
+		];
 	}
 
 	public function testItChecksScopes()
 	{
-		$this->setUpScopeCheckTests(['user', 'admin']);
-
-		$checker = new UsesChecksScopesTrait;
+		$checker = new ChecksScopesTestStubClass;
 
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(true);
@@ -51,9 +31,7 @@ class ChecksScopesTest extends ApiTestCase
 
 	public function testItRequiresOneOfManyScalarArguments()
 	{
-		$this->setUpScopeCheckTests(['user', 'admin', 'owner', 'human']);
-
-		$checker = new UsesChecksScopesTrait;
+		$checker = new ChecksScopesTestStubClass;
 
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('admin')->andReturn(true);
@@ -66,9 +44,7 @@ class ChecksScopesTest extends ApiTestCase
 
 	public function testItRequiresOneOfManyScalarArgumentsFails()
 	{
-		$this->setUpScopeCheckTests(['user', 'admin', 'owner', 'human']);
-
-		$checker = new UsesChecksScopesTrait;
+		$checker = new ChecksScopesTestStubClass;
 
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('not admin')->andReturn(false);
@@ -87,9 +63,7 @@ class ChecksScopesTest extends ApiTestCase
 
 	public function testItRequiresOneOfManyNonScalarArgumentsSucceeds()
 	{
-		$this->setUpScopeCheckTests(['user', 'admin', 'owner', 'human']);
-
-		$checker = new UsesChecksScopesTrait;
+		$checker = new ChecksScopesTestStubClass;
 
 		Authorizer::shouldReceive('hasScope')->once()
 			->with(['animal', 'hamburger'])->andReturn(false);
@@ -108,9 +82,7 @@ class ChecksScopesTest extends ApiTestCase
 
 	public function testItRequiresOneOfManyNonScalarArgumentsFails()
 	{
-		$this->setUpScopeCheckTests(['user', 'admin', 'owner', 'human']);
-
-		$checker = new UsesChecksScopesTrait;
+		$checker = new ChecksScopesTestStubClass;
 
 		Authorizer::shouldReceive('hasScope')->once()
 			->with(['animal', 'hamburger'])->andReturn(false);
@@ -132,9 +104,7 @@ class ChecksScopesTest extends ApiTestCase
 
 	public function testItRequiresAllOfSingleArrayArgumentsSucceeds()
 	{
-		$this->setUpScopeCheckTests(['user', 'admin', 'owner', 'human']);
-
-		$checker = new UsesChecksScopesTrait;
+		$checker = new ChecksScopesTestStubClass;
 
 		Authorizer::shouldReceive('hasScope')->once()
 			->with(['user', 'admin', 'owner'])->andReturn(true);
@@ -147,9 +117,7 @@ class ChecksScopesTest extends ApiTestCase
 
 	public function testItRequiresAllOfSingleArrayArgumentsFails()
 	{
-		$this->setUpScopeCheckTests(['user', 'admin', 'owner', 'human']);
-
-		$checker = new UsesChecksScopesTrait;
+		$checker = new ChecksScopesTestStubClass;
 
 		Authorizer::shouldReceive('hasScope')->once()
 			->with(['user', 'admin', 'owner', 'not a scope'])->andReturn(false);
@@ -162,9 +130,7 @@ class ChecksScopesTest extends ApiTestCase
 
 	public function testItRequiresOneOfManyMixedSucceeds()
 	{
-		$this->setUpScopeCheckTests(['user', 'admin', 'owner', 'human']);
-
-		$checker = new UsesChecksScopesTrait;
+		$checker = new ChecksScopesTestStubClass;
 
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('dog')->andReturn(false);
@@ -183,9 +149,7 @@ class ChecksScopesTest extends ApiTestCase
 
 	public function testItRequiresOneOfManyMixedFails()
 	{
-		$this->setUpScopeCheckTests(['user', 'admin', 'owner', 'human']);
-
-		$checker = new UsesChecksScopesTrait;
+		$checker = new ChecksScopesTestStubClass;
 
 		Authorizer::shouldReceive('hasScope')->once()
 			->with('dog')->andReturn(false);
@@ -204,92 +168,9 @@ class ChecksScopesTest extends ApiTestCase
 
 		$this->assertFalse($has_scopes);
 	}
-
-	public function createScopes()
-	{
-		$scopes = [
-			[
-				'id'          => 'user',
-				'description' => 'User',
-				'created_at'  => Carbon::now(),
-				'updated_at'  => Carbon::now(),
-			],
-			[
-				'id'          => 'admin',
-				'description' => 'Admin',
-				'created_at'  => Carbon::now(),
-				'updated_at'  => Carbon::now(),
-			],
-		];
-
-		DB::table('oauth_scopes')->insert($scopes);
-	}
-
-	public function createClients()
-	{
-		$clients = [
-			[
-				'id'     => 'client1',
-				'secret' => 'client1secret',
-				'name'   => 'CMS',
-				'scopes' => [
-					'user',
-					'admin',
-				],
-			],
-		];
-
-		foreach ($clients as $client) {
-			$instance         = new OauthClient;
-			$instance->id     = $client['id'];
-			$instance->secret = $client['secret'];
-			$instance->name   = $client['name'];
-			$instance->save();
-
-			DB::table('oauth_client_scopes')->insert(
-				array_map(
-					function ($scope) use ($client) {
-						return [
-							'client_id'  => $client['id'],
-							'scope_id'   => $scope,
-							'created_at' => Carbon::now(),
-							'updated_at' => Carbon::now(),
-						];
-					}, $client['scopes']
-				)
-			);
-		}
-	}
-
-	public function getClient()
-	{
-		return [
-			'client_id'     => 'client1',
-			'client_secret' => 'client1secret',
-		];
-	}
-
-	public function setUpOauthTest()
-	{
-		$this->createScopes();
-		$this->createClients();
-	}
-
-	public function createUserInDatabase(array $attributes)
-	{
-		$user = new User;
-
-		foreach ($attributes as $key => $value) {
-			$user->{$key} = $value;
-		}
-
-		$user->save();
-
-		return $user;
-	}
 }
 
-class UsesChecksScopesTrait
+class ChecksScopesTestStubClass
 {
 	use ChecksScopes;
 }

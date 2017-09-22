@@ -12,9 +12,10 @@ class OAuthController extends Controller
 	 * Issue an access token.
 	 *
 	 * @param \Illuminate\Contracts\Foundation\Application $app
-	 * @return \Illuminate\Http\JsonResponse
+	 *
+	 * @return \Symfony\Component\HttpFoundation\JsonResponse
 	 */
-	public function issueAccessToken(Application $app)
+	public function issueAccessToken(Application $app): JsonResponse
 	{
 		return new JsonResponse($app['oauth2-server.authorizer']->issueAccessToken());
 	}

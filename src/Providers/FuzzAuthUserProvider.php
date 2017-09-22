@@ -2,14 +2,12 @@
 
 namespace Fuzz\Auth\Providers;
 
-use Fuzz\Auth\Models\AgentInterface;
-use Fuzz\Auth\Models\AgentResolverInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Support\Facades\DB;
 use LucaDegasperi\OAuth2Server\Facades\Authorizer;
 
-class FuzzAuthUserProvider implements UserProvider, AgentResolverInterface
+class FuzzAuthUserProvider implements UserProvider
 {
 	/**
 	 * User model class
@@ -112,25 +110,7 @@ class FuzzAuthUserProvider implements UserProvider, AgentResolverInterface
 	 */
 	public function validateCredentials(Authenticatable $user, array $credentials)
 	{
-		if (! ($user instanceof AgentInterface)) {
-			throw new \LogicException('User model does not implement ' . AgentInterface::class . '.');
-		}
-
 		return ! is_null($this->retrieveByCredentials($credentials));
-	}
-
-	/**
-	 * Resolve the application agent from the request token
-	 *
-	 * @return \Illuminate\Database\Eloquent\Model
-	 */
-	public function resolveAppAgent()
-	{
-		if (Authorizer::validateAccessToken()) {
-			return $this->retrieveById(Authorizer::getResourceOwnerId());
-		}
-
-		return null;
 	}
 
 	/**

@@ -4,82 +4,63 @@ namespace Fuzz\Auth\Policies;
 
 use Fuzz\Auth\Models\Traits\ChecksScopes;
 use Fuzz\MagicBox\Contracts\Repository;
-use League\OAuth2\Server\Exception\AccessDeniedException;
 
 abstract class RepositoryModelPolicy implements RepositoryModelPolicyInterface
 {
 	use ChecksScopes;
 
 	/**
-	 * Require a set of scopes or throw exception
+	 * Determine if this request can access an index of the repository
 	 *
-	 * Scopes passed as an array in one argument are all required. Of scopes that are passed as separate arguments,
-	 * only one set is required.
-	 *
-	 * $args = ['IAmRequired', 'MeToo'], ['orUs', 'andUsToo']
-	 *
-	 * @return bool
-	 * @throws \League\OAuth2\Server\Exception\AccessDeniedException
-	 */
-	public function requireScopes()
-	{
-		$scopes = func_get_args();
-
-		$has_scopes = call_user_func_array([$this, 'hasOneOfScopes'], $scopes);
-
-		if (! $has_scopes) {
-			throw new AccessDeniedException;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Merge new filters with the existing repository filters
-	 *
-	 * @param array                               $filters
 	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
-	 * @return void
-	 */
-	public function applyRepositoryFilters(array $filters, Repository $repository)
-	{
-		$repository->setFilters(array_merge($repository->getFilters(), $filters));
-	}
-
-	/**
-	 * Test whether the current request has the required set of scopes.
-	 *
-	 * Scopes passed as an array in one argument are all required. Of scopes that are passed as separate arguments,
-	 * only one set is required.
-	 *
-	 * $args = ['IAmRequired', 'MeToo'], ['orUs', 'andUsToo']
-	 *
 	 * @return bool
 	 */
-	public function requestHasOneOfScopes()
+	public function index(Repository $repository)
 	{
-		$scopes = func_get_args();
-
-		return call_user_func_array([$this, 'hasOneOfScopes'], $scopes);
+		return false;
 	}
 
 	/**
-	 * Find a query filter (if any) for this scope
+	 * Determine if this request can show this repository
 	 *
-	 * @param string $scope
-	 * @return \Closure|null
+	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @return bool
 	 */
-	public function getScopeFilter($scope)
+	public function show(Repository $repository)
 	{
-		$filters = $this->getFilters();
-
-		return isset($filters[$scope]) ? $filters[$scope] : null;
+		return false;
 	}
 
 	/**
-	 * Find a query filter (if any) for this scope
+	 * Determine if this request can update this repository
 	 *
-	 * @return array
+	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @return bool
 	 */
-	abstract public function getFilters();
+	public function update(Repository $repository)
+	{
+		return false;
+	}
+
+	/**
+	 * Determine if this request can store this repository
+	 *
+	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @return bool
+	 */
+	public function store(Repository $repository)
+	{
+		return false;
+	}
+
+	/**
+	 * Determine if this request can destroy this repository
+	 *
+	 * @param \Fuzz\MagicBox\Contracts\Repository $repository
+	 * @return bool
+	 */
+	public function destroy(Repository $repository)
+	{
+		return false;
+	}
 }

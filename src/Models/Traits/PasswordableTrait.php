@@ -42,17 +42,6 @@ trait PasswordableTrait
 	}
 
 	/**
-	 * Check if a password token is valid.
-	 *
-	 * @param  string $password_token
-	 * @return boolean
-	 */
-	private function checkPasswordToken($password_token)
-	{
-		return Hash::check($password_token, $this->attributes['password_token']);
-	}
-
-	/**
 	 * Generate a new password token.
 	 *
 	 * @return string
@@ -76,14 +65,34 @@ trait PasswordableTrait
 	 */
 	public function changePassword($password_token, $new_password)
 	{
-		if ($this->checkPasswordToken($password_token)) {
-			$this->password                     = $new_password;
-			$this->attributes['password_token'] = null;
-			FuzzAuthUserProvider::revokeSessionsForOwnerTypeAndId('user', $this->{$this->getKey()});
-
-			return true;
+		if (! $this->checkPasswordToken($password_token)) {
+			return false;
 		}
 
-		return false;
+		$this->setPasswordAttribute($new_password);
+		$this->attributes['password_token'] = null;
+
+		$this->revokeSessions();
+
+		return true;
+	}
+
+	/**
+	 * Revoke the users sessions
+	 */
+	public function revokeSessions()
+	{
+		FuzzAuthUserProvider::revokeSessionsForOwnerTypeAndId('user', $this->{$this->getKey()});
+	}
+
+	/**
+	 * Check if a password token is valid.
+	 *
+	 * @param  string $password_token
+	 * @return boolean
+	 */
+	private function checkPasswordToken($password_token)
+	{
+		return Hash::check($password_token, $this->attributes['password_token']);
 	}
 }

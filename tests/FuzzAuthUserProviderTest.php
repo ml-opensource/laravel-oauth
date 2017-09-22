@@ -11,48 +11,21 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Database\Eloquent\Model;
 use LucaDegasperi\OAuth2Server\Facades\Authorizer;
+use LucaDegasperi\OAuth2Server\OAuth2ServerServiceProvider;
+use LucaDegasperi\OAuth2Server\Storage\FluentStorageServiceProvider;
+use Mockery;
 
-class FuzzAuthUserProviderTest extends ApiTestCase
+class FuzzAuthUserProviderTest extends ApplicationTestCase
 {
-	public function createUserInDatabase(array $attributes)
+	protected function getPackageProviders($app)
 	{
-		$user = new User;
-
-		foreach ($attributes as $key => $value) {
-			$user->{$key} = $value;
-		}
-
-		$user->save();
-
-		return $user;
-	}
-
-	public function getProvider($model_class = User::class, $token_key = 'access_token', $driver = 'oauth')
-	{
-		$config = [
-			'driver' => $driver,
-			'model' => $model_class,
-			'token_key' => $token_key
+		return [
+			FluentStorageServiceProvider::class,
+			OAuth2ServerServiceProvider::class,
 		];
-
-		return new FuzzAuthUserProvider($config);
 	}
 
-	public function testItImplementsUserProviderAndAgentResolverInterface()
-	{
-		$config = [
-			'driver' => 'oauth',
-			'model' => User::class,
-			'token_key' => 'access_token'
-		];
-
-		$provider = new FuzzAuthUserProvider($config);
-
-		$this->assertTrue($provider instanceof UserProvider);
-		$this->assertTrue($provider instanceof AgentResolverInterface);
-	}
-
-	public function testItFailsGracefullyOnInvalidModelConfig()
+	public function testItFailsOnInvalidModelConfig()
 	{
 		$config = [
 			'driver' => 'oauth',
@@ -63,7 +36,7 @@ class FuzzAuthUserProviderTest extends ApiTestCase
 		$provider = new FuzzAuthUserProvider($config);
 	}
 
-	public function testItFailsGracefullyOnInvalidTokenKeyConfig()
+	public function testItFailsOnInvalidTokenKeyConfig()
 	{
 		$config = [
 			'driver' => 'oauth',
@@ -74,273 +47,131 @@ class FuzzAuthUserProviderTest extends ApiTestCase
 		$provider = new FuzzAuthUserProvider($config);
 	}
 
-	public function testItCanRetrieveUserById()
+	public function testItCanRetrieveById()
 	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
+		$config = [
+			'driver' => 'oauth',
+			'model' => FuzzAuthUserProviderTestUserStub::class,
+			'token_key' => 'access_token'
 		];
 
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
+		$provider = new FuzzAuthUserProvider($config);
 
-		$user_by_id = $provider->retrieveById($user->id);
-
-		$this->assertTrue($user_by_id instanceof Authenticatable);
-		$this->assertTrue($user_by_id instanceof AgentInterface);
-		$this->assertTrue($user_by_id instanceof Model);
-		$this->assertEquals($user->id, $user_by_id->id);
-		$this->assertEquals($user->username, $user_by_id->username);
+		$this->assertSame(65785, $provider->retrieveById(FuzzAuthUserProviderTestUserStub::ID)->id);
 	}
 
-	public function testItRetrieveNullIfUserDoesNotExist()
+	public function testItReturnsNullOnRetrieveByIdIfNotExists()
 	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
+		$config = [
+			'driver' => 'oauth',
+			'model' => FuzzAuthUserProviderTestUserStub::class,
+			'token_key' => 'access_token'
 		];
 
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
+		$provider = new FuzzAuthUserProvider($config);
 
-		$user_by_id = $provider->retrieveById(9999); // Doesn't exist
-
-		$this->assertNull($user_by_id);
+		$this->assertNull($provider->retrieveById(1019));
 	}
 
-	public function testItCanRetrieveByToken()
+	public function testItRetrievesByToken()
 	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
+		$config = [
+			'driver' => 'oauth',
+			'model' => FuzzAuthUserProviderTestUserStub::class,
+			'token_key' => 'access_token'
 		];
 
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
+		$provider = new FuzzAuthUserProvider($config);
 
-		Authorizer::shouldReceive('validateAccessToken')->once()
-			->with(false, 'arbitraryString')->andReturn(true);
+		Authorizer::shouldReceive('validateAccessToken')->with(false, 'foo_token')->once()->andReturn(true);
+		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn(65785);
 
-		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn($user->id);
-
-		$user_by_token = $provider->retrieveByToken($user->id, 'arbitraryString');
-
-		$this->assertTrue($user_by_token instanceof Authenticatable);
-		$this->assertTrue($user_by_token instanceof AgentInterface);
-		$this->assertTrue($user_by_token instanceof Model);
-		$this->assertEquals($user->id, $user_by_token->id);
-		$this->assertEquals($user->username, $user_by_token->username);
+		$this->assertSame(65785, $provider->retrieveByToken('id', 'foo_token')->id);
 	}
 
-	public function testItReturnsNullIfTokenIsInvalid()
+	public function testItReturnsNullIfRetrievingByTokenByIdNotFound()
 	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
+		$config = [
+			'driver' => 'oauth',
+			'model' => FuzzAuthUserProviderTestUserStub::class,
+			'token_key' => 'access_token'
 		];
 
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
+		$provider = new FuzzAuthUserProvider($config);
 
-		Authorizer::shouldReceive('validateAccessToken')->once()
-			->with(false, 'arbitraryString')->andReturn(false);
+		Authorizer::shouldReceive('validateAccessToken')->with(false, 'foo_token')->once()->andReturn(true);
+		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn(1242);
 
-		Authorizer::shouldReceive('getResourceOwnerId')->never();
-
-		$user_by_token = $provider->retrieveByToken($user->id, 'arbitraryString');
-
-		$this->assertNull($user_by_token);
+		$this->assertNull($provider->retrieveByToken('id', 'foo_token'));
 	}
 
-	public function testItReturnsNullTokenUserIfItDoesNotExist()
+	public function testItRetrievesByCredentials()
 	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
+		$config = [
+			'driver' => 'oauth',
+			'model' => FuzzAuthUserProviderTestUserStub::class,
+			'token_key' => 'access_token'
 		];
 
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
+		$provider = new FuzzAuthUserProvider($config);
 
-		Authorizer::shouldReceive('validateAccessToken')->once()
-			->with(false, 'arbitraryString')->andReturn(true);
+		Authorizer::shouldReceive('validateAccessToken')->with(false, 'foo_token')->once()->andReturn(true);
+		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn(65785);
 
-		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn(9999); // doesn't exist
-
-		$user_by_token = $provider->retrieveByToken($user->id, 'arbitraryString');
-
-		$this->assertNull($user_by_token);
+		$this->assertSame(65785, $provider->retrieveByCredentials([
+			'access_token' => 'foo_token'
+		])->id);
 	}
 
-	public function testItCanRetrieveByCredentials()
+	public function testItValidatesCredentials()
 	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
+		$config = [
+			'driver' => 'oauth',
+			'model' => FuzzAuthUserProviderTestUserStub::class,
+			'token_key' => 'access_token'
 		];
+		$mock = Mockery::mock(Authenticatable::class);
 
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
+		$provider = new FuzzAuthUserProvider($config);
 
-		Authorizer::shouldReceive('validateAccessToken')->once()
-			->with(false, 'arbitraryString')->andReturn(true);
+		Authorizer::shouldReceive('validateAccessToken')->with(false, 'foo_token')->once()->andReturn(true);
+		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn(65785);
 
-		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn($user->id);
-
-		$user_by_credentials = $provider->retrieveByCredentials(['access_token' => 'arbitraryString']);
-
-		$this->assertTrue($user_by_credentials instanceof Authenticatable);
-		$this->assertTrue($user_by_credentials instanceof AgentInterface);
-		$this->assertTrue($user_by_credentials instanceof Model);
-		$this->assertEquals($user->id, $user_by_credentials->id);
-		$this->assertEquals($user->username, $user_by_credentials->username);
+		$this->assertTrue($provider->validateCredentials($mock, [
+			'access_token' => 'foo_token'
+		]));
 	}
+}
 
-	public function testItReturnsNullIfCredentialsAreInvalid()
+class FuzzAuthUserProviderTestUserStub
+{
+	const ID = 65785;
+
+	public static function whereId($id)
 	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
-		];
+		if ($id !== self::ID) {
+			return new FailedQuery;
+		}
 
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
-
-		Authorizer::shouldReceive('validateAccessToken')->once()
-			->with(false, 'arbitraryString')->andReturn(true);
-
-		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn(9999); // Doesn't exist
-
-		$user_by_credentials = $provider->retrieveByCredentials(['access_token' => 'arbitraryString']);
-
-		$this->assertNull($user_by_credentials);
+		return new SuccessQuery;
 	}
+}
 
-	public function testItCanValidateCredentials()
+class SuccessQuery
+{
+	public function first()
 	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
-		];
+		$mock = Mockery::mock(Authenticatable::class);
+		$mock->id = 65785;
 
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
-
-		Authorizer::shouldReceive('validateAccessToken')->once()
-			->with(false, 'arbitraryString')->andReturn(true);
-
-		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn($user->id); // Doesn't exist
-
-		$is_valid = $provider->validateCredentials($user, ['access_token' => 'arbitraryString']);
-
-		$this->assertTrue($is_valid);
+		return $mock;
 	}
+}
 
-	public function testItReturnsFalseIfCredentialsAreInvalid()
+class FailedQuery
+{
+	public function first()
 	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
-		];
-
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
-
-		Authorizer::shouldReceive('validateAccessToken')->once()
-			->with(false, 'arbitraryString')->andReturn(false);
-
-		Authorizer::shouldReceive('getResourceOwnerId')->never();
-
-		$is_valid = $provider->validateCredentials($user, ['access_token' => 'arbitraryString']);
-
-		$this->assertFalse($is_valid);
-	}
-
-	public function testItReturnsFalseIfCredentialsAreValidButUserIsNot()
-	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
-		];
-
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
-
-		Authorizer::shouldReceive('validateAccessToken')->once()
-			->with(false, 'arbitraryString')->andReturn(true);
-
-		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn(9999); // Doesn't exist
-
-		$is_valid = $provider->validateCredentials($user, ['access_token' => 'arbitraryString']);
-
-		$this->assertFalse($is_valid);
-	}
-
-	public function testItThrowsExceptionIfUserDoesNotImplementAgentInterface()
-	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
-		];
-
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider(NotAgentUser::class);
-
-		Authorizer::shouldReceive('validateAccessToken')->never();
-
-		Authorizer::shouldReceive('getResourceOwnerId')->never();
-
-		$this->setExpectedException(\LogicException::class, 'User model does not implement ' .  AgentInterface::class  . '.');
-		$is_valid = $provider->validateCredentials((new NotAgentUser), ['access_token' => 'arbitraryString']);
-
-		$this->assertFalse($is_valid);
-	}
-
-	public function testItCanResolveAppAgent()
-	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
-		];
-
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
-
-		Authorizer::shouldReceive('validateAccessToken')->once()->andReturn(true);
-
-		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn($user->id);
-
-		$resolved_user = $provider->resolveAppAgent();
-
-		$this->assertTrue($resolved_user instanceof Authenticatable);
-		$this->assertTrue($resolved_user instanceof AgentInterface);
-		$this->assertTrue($resolved_user instanceof Model);
-		$this->assertEquals($user->id, $resolved_user->id);
-		$this->assertEquals($user->username, $resolved_user->username);
-	}
-
-	public function testItReturnsNullIfAgentIsNotResolved()
-	{
-		$user_data = [
-			'username' => 'FuzzUser',
-			'password' => 'securePassword1'
-		];
-
-		$user = $this->createUserInDatabase($user_data);
-		$provider = $this->getProvider();
-
-		Authorizer::shouldReceive('validateAccessToken')->once()->andReturn(false);
-
-		Authorizer::shouldReceive('getResourceOwnerId')->never(); // Doesn't exist
-
-		$resolved_user = $provider->resolveAppAgent();
-
-		$this->assertNull($resolved_user);
-	}
-
-	// @todo what's the best way to test this?
-	public function testItCanRevokeSessionsForOwnerTypeAndId()
-	{
-
+		return null;
 	}
 }

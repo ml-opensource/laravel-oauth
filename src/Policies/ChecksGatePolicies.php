@@ -27,6 +27,7 @@ trait ChecksGatePolicies
 	public function setPolicyClass($policy_class)
 	{
 		$this->policy_class = $policy_class;
+
 		return $this->policy(true);
 	}
 

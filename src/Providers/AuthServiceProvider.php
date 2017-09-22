@@ -4,7 +4,6 @@ namespace Fuzz\Auth\Providers;
 
 use Fuzz\Auth\Guards\OAuthGuard;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use LucaDegasperi\OAuth2Server\OAuth2ServerServiceProvider;
 use LucaDegasperi\OAuth2Server\Storage\FluentStorageServiceProvider;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -22,24 +21,26 @@ class AuthServiceProvider extends ServiceProvider
 	}
 
 	/**
-	 * Register any application authentication / authorization services.
+	 * Set up the user provider
 	 *
-	 * @param  \Illuminate\Contracts\Auth\Access\Gate $gate
 	 * @return void
 	 */
-	public function boot(GateContract $gate)
+	public function setUpAuthUserProvider()
 	{
-		$this->registerPolicies($gate);
-
-		Auth::provider(
-			'oauth', function ($app, array $config) {
-				return new FuzzAuthUserProvider($config);
+		Auth::provider(FuzzAuthUserProvider::class, function ($app, array $config) {
+			return new FuzzAuthUserProvider($config);
 		});
+	}
 
-		// Register an OAuthGuard to be used
-		Auth::extend(
-			OAuthGuard::class, function ($app, $name, array $config) {
-				return new OAuthGuard(Auth::createUserProvider($config['provider']));
+	/**
+	 * Extend the API auth provider
+	 *
+	 * @return void
+	 */
+	public function extendApiAuthProvider()
+	{
+		Auth::extend(OAuthGuard::class, function ($app, $name, array $config) {
+			return new OAuthGuard(Auth::createUserProvider($config['provider']));
 		});
 	}
 

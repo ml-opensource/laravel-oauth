@@ -2,11 +2,12 @@
 
 namespace Fuzz\Auth\Guards;
 
-use Fuzz\Auth\Models\AgentResolverInterface;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
+use League\OAuth2\Server\Exception\AccessDeniedException;
 use League\OAuth2\Server\Exception\InvalidRequestException;
+use LucaDegasperi\OAuth2Server\Facades\Authorizer;
 
 class OAuthGuard implements Guard
 {
@@ -26,16 +27,13 @@ class OAuthGuard implements Guard
 	 */
 	public function __construct(UserProvider $provider)
 	{
-		if (! $provider instanceof AgentResolverInterface) {
-			throw new \LogicException(get_class($provider) . ' does not implement ' . AgentResolverInterface::class);
-		}
 		$this->provider = $provider;
 	}
 
 	/**
 	 * Get the currently authenticated user.
 	 *
-	 * @uses LucaDegasperi\OAuth2Server\Authorizer
+	 * @uses \LucaDegasperi\OAuth2Server\Authorizer
 	 *
 	 * @return \Illuminate\Contracts\Auth\Authenticatable|null
 	 */
@@ -49,8 +47,10 @@ class OAuthGuard implements Guard
 		}
 
 		try {
-			return $this->user = $this->provider->resolveAppAgent();
+			return $this->user = $this->provider->retrieveById(Authorizer::getResourceOwnerId());
 		} catch (InvalidRequestException $e) {
+			return $this->user = null;
+		} catch (AccessDeniedException $e) {
 			return $this->user = null;
 		}
 	}
