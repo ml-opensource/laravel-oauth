@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
 use League\OAuth2\Server\Exception\AccessDeniedException;
 use League\OAuth2\Server\Exception\InvalidRequestException;
+use LucaDegasperi\OAuth2Server\Exceptions\NoActiveAccessTokenException;
 use LucaDegasperi\OAuth2Server\Facades\Authorizer;
 
 class OAuthGuard implements Guard
@@ -47,10 +48,14 @@ class OAuthGuard implements Guard
 		}
 
 		try {
+			Authorizer::validateAccessToken();
+
 			return $this->user = $this->provider->retrieveById(Authorizer::getResourceOwnerId());
 		} catch (InvalidRequestException $e) {
 			return $this->user = null;
 		} catch (AccessDeniedException $e) {
+			return $this->user = null;
+		} catch (NoActiveAccessTokenException $e) {
 			return $this->user = null;
 		}
 	}

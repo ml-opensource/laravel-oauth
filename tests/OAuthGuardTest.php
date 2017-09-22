@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Database\Eloquent\Model;
 use League\OAuth2\Server\Exception\AccessDeniedException;
 use League\OAuth2\Server\Exception\InvalidRequestException;
+use LucaDegasperi\OAuth2Server\Exceptions\NoActiveAccessTokenException;
 use LucaDegasperi\OAuth2Server\Facades\Authorizer;
 use LucaDegasperi\OAuth2Server\OAuth2ServerServiceProvider;
 use LucaDegasperi\OAuth2Server\Storage\FluentStorageServiceProvider;
@@ -28,7 +29,7 @@ class OAuthGuardTest extends ApplicationTestCase
 		$provider = Mockery::mock(UserProvider::class);
 		$guard = new OAuthGuard($provider);
 
-		Authorizer::shouldReceive('getResourceOwnerId')->once()->andThrow(InvalidRequestException::class);
+		Authorizer::shouldReceive('validateAccessToken')->once()->andThrow(InvalidRequestException::class);
 		$provider->shouldReceive('retrieveById')->never();
 
 		$this->assertNull($guard->user());
@@ -39,7 +40,18 @@ class OAuthGuardTest extends ApplicationTestCase
 		$provider = Mockery::mock(UserProvider::class);
 		$guard = new OAuthGuard($provider);
 
-		Authorizer::shouldReceive('getResourceOwnerId')->once()->andThrow(AccessDeniedException::class);
+		Authorizer::shouldReceive('validateAccessToken')->once()->andThrow(AccessDeniedException::class);
+		$provider->shouldReceive('retrieveById')->never();
+
+		$this->assertNull($guard->user());
+	}
+
+	public function testItReturnsNullIfUserNotFound3()
+	{
+		$provider = Mockery::mock(UserProvider::class);
+		$guard = new OAuthGuard($provider);
+
+		Authorizer::shouldReceive('validateAccessToken')->once()->andThrow(NoActiveAccessTokenException::class);
 		$provider->shouldReceive('retrieveById')->never();
 
 		$this->assertNull($guard->user());
@@ -51,6 +63,7 @@ class OAuthGuardTest extends ApplicationTestCase
 		$guard = new OAuthGuard($provider);
 		$user = Mockery::mock(Model::class);
 
+		Authorizer::shouldReceive('validateAccessToken')->once();
 		Authorizer::shouldReceive('getResourceOwnerId')->once()->andReturn('some_id');
 		$provider->shouldReceive('retrieveById')->with('some_id')->once()->andReturn($user);
 
